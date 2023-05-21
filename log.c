@@ -6,7 +6,7 @@ enum log_levels {
 	INFO,
 	TRACE,
 	DEBUG
-	};
+};
 	
 char log_level;
 char set_log_level(char level) {

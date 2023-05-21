@@ -1,7 +1,7 @@
 #include "commands.c"
 
 void run() {
-//	load_data();
+	load_data();
 	Command cmd;
 	while(1) {
 		cmd = parse_cmd(read_cmd());

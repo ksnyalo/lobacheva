@@ -25,83 +25,84 @@ void test_cmp();
 // чтение и запись байтов и слов
 void test_mem() {
 	Adress a;
-    byte b0, b1, bres, b1res, b2res;
-    word w, wres;
+	byte b0, b1, bres, b1res, b2res;
+	word w, wres;
 
 
-    // пишем байт, читаем байт
-    fprintf(stderr, "Пишем и читаем байт по четному адресу\n");
-    a = 100;
-    b0 = 0x12;
-    b_write(a, b0);
-    bres = b_read(a);
-    // отладочная печать a, b0, bres
-    fprintf(stderr, "a=%06o b0=%hhx bres=%hhx\n\n", a, b0, bres);
-    assert(b0 == bres);
+	// пишем байт, читаем байт
+	fprintf(stderr, "Пишем и читаем байт по четному адресу\n");
+	a = 100;
+	b0 = 0x12;
+	b_write(a, b0);
+	bres = b_read(a);
+	// отладочная печать a, b0, bres
+	fprintf(stderr, "a=%06o b0=%hhx bres=%hhx\n\n", a, b0, bres);
+	assert(b0 == bres);
 
 	fprintf(stderr, "Пишем и читаем байт по нечетному адресу\n");
-    a = 103;
-    b0 = 0x12;
-    b_write(a, b0);
-    bres = b_read(a);
-    // отладочная печать a, b0, bres
-    fprintf(stderr, "a=%06o b0=%hhx bres=%hhx\n\n", a, b0, bres);
-    assert(b0 == bres);
+	a = 103;
+	b0 = 0x12;
+	b_write(a, b0);
+	bres = b_read(a);
+	// отладочная печать a, b0, bres
+	fprintf(stderr, "a=%06o b0=%hhx bres=%hhx\n\n", a, b0, bres);
+	assert(b0 == bres);
 
 
-    // пишем слово, читаем слово
-    fprintf(stderr, "Пишем и читаем слово\n");
-    a = 100;        // другой адрес
-    w = 0x3456;
-    w_write(a, w);
-    wres = w_read(a);
-    // отладочная печать a, w, wres
-    fprintf(stderr, "a=%06o w=%04x wres=%04x\n\n", a, w, wres);
-    assert(w == wres);
+	// пишем слово, читаем слово
+	fprintf(stderr, "Пишем и читаем слово\n");
+	a = 100;        // другой адрес
+	w = 0x3456;
+	w_write(a, w);
+	wres = w_read(a);
+	// отладочная печать a, w, wres
+	fprintf(stderr, "a=%06o w=%04x wres=%04x\n\n", a, w, wres);
+	assert(w == wres);
 
 
-    // пишем 2 байта, читаем 1 слово
-    fprintf(stderr, "Пишем 2 байта, читаем слово\n");
-    a = 4;        // другой адрес
-    w = 0xa1b2;
-    // little-endian, младшие разряды по меньшему адресу
-    b0 = 0xb2;
-    b1 = 0xa1;
-    b_write(a, b0);
-    b_write(a+1, b1);
-    wres = w_read(a);
-    // отладочная печать a, b1, b0, w, wres
-    fprintf(stderr, "a=%06o b1=%02hhx b0=%02hhx w=%04x wres=%04x\n\n", a, b1, b0, w, wres);
-    assert(w == wres);
+	// пишем 2 байта, читаем 1 слово
+	fprintf(stderr, "Пишем 2 байта, читаем слово\n");
+	a = 4;        // другой адрес
+	w = 0xa1b2;
+	// little-endian, младшие разряды по меньшему адресу
+	b0 = 0xb2;
+	b1 = 0xa1;
+	b_write(a, b0);
+	b_write(a+1, b1);
+	wres = w_read(a);
+	// отладочная печать a, b1, b0, w, wres
+	fprintf(stderr, "a=%06o b1=%02hhx b0=%02hhx w=%04x wres=%04x\n\n", a, b1, b0, w, wres);
+	assert(w == wres);
+
 
 	// пишем слово, читаем 2 байта
 	fprintf(stderr, "Пишем слово, читаем 2 байта\n");
-    a = 10;        // другой адрес
-    w = 0xc3b2;
+	a = 10;        // другой адрес
+	w = 0xc3b2;
 	b0 = 0xb2;
 	b1 = 0xc3;
-    // little-endian, младшие разряды по меньшему адресу
+	// little-endian, младшие разряды по меньшему адресу
 	w_write(a, w);
 	b1res = b_read(a);
 	b2res = b_read(a+1);
-    // отладочная печать a, w, b1res, b2res
-    fprintf(stderr, "a=%06o b2res=%02hhx b1res=%02hhx w=%04x\n", a, b2res, b1res, w);
+	// отладочная печать a, w, b1res, b2res
+	fprintf(stderr, "a=%06o b2res=%02hhx b1res=%02hhx w=%04x\n", a, b2res, b1res, w);
 	assert(b0 == b1res);
-    assert(b1 == b2res);
+	assert(b1 == b2res);
 
 	// еще тест
 	fprintf(stderr, "Пишем 2 байта, читаем слово\n");
-    a = 11;        // другой адрес
-    w = 0xd3f5;
-    // little-endian, младшие разряды по меньшему адресу
-    b0 = 0xf5;
-    b1 = 0xd3;
-    b_write(a, b1);
-    b_write(a-1, b0);
-    wres = w_read(a-1);
-    // отладочная печать
-    fprintf(stderr, "a=%06o b1=%02hhx b0=%02hhx wres=%04x\n\n", a, b1, b0, wres);
-    assert(w == wres);
+	a = 11;        // другой адрес
+	w = 0xd3f5;
+	// little-endian, младшие разряды по меньшему адресу
+	b0 = 0xf5;
+	b1 = 0xd3;
+	b_write(a, b1);
+	b_write(a-1, b0);
+	wres = w_read(a-1);
+	// отладочная печать
+	fprintf(stderr, "a=%06o b1=%02hhx b0=%02hhx wres=%04x\n\n", a, b1, b0, wres);
+	assert(w == wres);
 }
 
 
@@ -380,19 +381,19 @@ void test_mode6() {
 
 
 void test_br() {
-    trace(TRACE, "Тест для функции br\n");
-    pc  = 0100;
-    Command testcmd = parse_cmd(000402);
-    testcmd.do_command();
+	trace(TRACE, "Тест для функции br\n");
+	pc  = 0100;
+	Command testcmd = parse_cmd(000402);
+	testcmd.do_command();
 	printf("nn.val = %o, pc = %o\n", nn.val, pc);
-    assert(pc == 0106);
+	assert(pc == 0106);
 
-    trace(TRACE, "Тест для функции br с отрицательным сдвигом\n");
-    pc  = 0106;
+	trace(TRACE, "Тест для функции br с отрицательным сдвигом\n");
+	pc  = 0106;
 	testcmd = parse_cmd(000774);
-    testcmd.do_command();
+	testcmd.do_command();
 	printf("nn.val = %d, pc = %o\n", nn.val, pc);
-    assert(pc == 0100);
+	assert(pc == 0100);
 	trace(TRACE, " ...OK\n");
 }
 
@@ -421,79 +422,79 @@ void test_cmp() {
 // тест для флагов N, Z, C
 void test_flagN() {
 	trace(TRACE, "flag N\n");
-    reg[3] = 5;     // dd
-    reg[5] = -8;    // ss
-    Command testcmd = parse_cmd(0060503);
-    testcmd.do_command();
-    assert(psw == (1<<2));
+	reg[3] = 5;     // dd
+	reg[5] = -8;    // ss
+	Command testcmd = parse_cmd(0060503);
+	testcmd.do_command();
+	assert(psw == (1<<2));
 
-    reg[5] = 10;
-    testcmd = parse_cmd(0060503);
-    testcmd.do_command();
+	reg[5] = 10;
+	testcmd = parse_cmd(0060503);
+	testcmd.do_command();
 	printf("psw = %d", psw);
-    assert((psw>>2) == 0);
+	assert((psw>>2) == 0);
 
-    reg[5] = -10;
-    testcmd = parse_cmd(0060503);
-    testcmd.do_command();
-    assert(psw == (1<<2));
+	reg[5] = -10;
+	testcmd = parse_cmd(0060503);
+	testcmd.do_command();
+	assert(psw == (1<<2));
 
-    trace(TRACE, " ... OK\n");
+	trace(TRACE, " ... OK\n");
 }
 
 
 void test_flagZ()
 {
-    trace(TRACE, "flag Z\n");
-    reg[3] = 6;    // dd
-    reg[5] = -6;    // ss
-    Command cmd = parse_cmd(060503);
-    cmd.do_command();
-    assert(psw == (1<<1));
+	trace(TRACE, "flag Z\n");
+	reg[3] = 6;    // dd
+	reg[5] = -6;    // ss
+	Command cmd = parse_cmd(060503);
+	cmd.do_command();
+	assert(psw == (1<<1));
 
-    reg[3] = 6;   
-    reg[5] = 7;
-    cmd = parse_cmd(010503);
-    cmd.do_command();
-    assert((psw>>1) == 0);
+	reg[3] = 6;   
+	reg[5] = 7;
+	cmd = parse_cmd(010503);
+	cmd.do_command();
+	assert((psw>>1) == 0);
 
-    reg[3] = 5;   
-    reg[5] = 0;
-    cmd = parse_cmd(010503);
-    cmd.do_command();
-    assert(psw == (1<<1));
+	reg[3] = 5;   
+	reg[5] = 0;
+	cmd = parse_cmd(010503);
+	cmd.do_command();
+	assert(psw == (1<<1));
 
-    trace(TRACE, " ... OK\n");  
+	trace(TRACE, " ... OK\n");  
 }
 
 void test_flagC() {
-    trace(TRACE, "flag C\n");
-    reg[3] = -1;   
-    reg[5] = -1;
-    Command cmd = parse_cmd(060503);
-    cmd.do_command();
-    assert(psw == (1<<2 | 1));
+	trace(TRACE, "flag C\n");
+	reg[3] = -1;   
+	reg[5] = -1;
+	Command cmd = parse_cmd(060503);
+	cmd.do_command();
+	assert(psw == (1<<2 | 1));
+	
+	reg[3] = 1;   
+	reg[5] = -1;
+	cmd = parse_cmd(060503);
+	cmd.do_command();
+	assert(psw == (1<<1));
 
-    reg[3] = 1;   
-    reg[5] = -1;
-    cmd = parse_cmd(060503);
-    cmd.do_command();
-    assert(psw == (1<<1));
-
-    trace(TRACE, " ... OK\n");
+	trace(TRACE, " ... OK\n");
 }
 
 
 int main() {
-    log_level = TRACE;
-    //test_br();
+	log_level = TRACE;
+	//test_br();
 	test_sob();
 	test_cmp();
-    test_flagN();
-    test_flagZ();
-    test_flagC();
+	test_flagN();
+	test_flagZ();
+	test_flagC();
 
-    test_mem();
+	test_mem();
 	test_parse_cmd();
 	test_mode0();
 	test_mode0_mov();
@@ -509,5 +510,5 @@ int main() {
 	test_mode6();
 	mem_clear();
 
-    return 0;
+	return 0;
 }
