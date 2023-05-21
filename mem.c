@@ -29,31 +29,33 @@ word w_read(Adress adr) {
 	return w & 0xFFFF;
 }
 
-void load_data(FILE * fin) {
-	Adress adr, N;
-	byte b0;
-	while(2 == fscanf(fin, "%04hx %04hx", &adr, &N)) {
-		for(Adress i = 0; i < N; i++, adr++) {
-			fscanf(fin, "%04hhx", &b0);
-			b_write(adr, b0);
+void load_file(const char * filename) {
+}
+
+void load_data() {
+	int n;
+	byte b;
+	
+	while(scanf("%x %x", &pc, &n) != EOF) {
+		int i;
+		for(i = 0; i < n; i ++) {
+			scanf("%hhx", &b);
+			b_write(pc + i, b);
 		}
 	}
 }
 
-void load_file(const char * filename) {
-	FILE * fin = fopen(filename, "r");
-	load_data(fin);
-}
-
 void mem_dump(Adress adr, int size) {
 	printf("%04x %04x\n", adr, size);
-	for(int i = 0; i < size; i += 2) {
+	int i;
+	for(i = 0; i < size; i += 2) {
 		printf("%06o: %06o %04x\n", adr+i, w_read(adr+i), w_read(adr+i));
 	}
 }
 		
 void reg_dump() {
-	for(int i = 0; i < 8; i++) {
+	int i;
+	for(i = 0; i < 8; i++) {
 		printf("reg%d:%o ", i, reg[i]);
 	}
 }

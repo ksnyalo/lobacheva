@@ -322,7 +322,8 @@ word read_cmd() {
 Command parse_cmd(word w) {
 	pc += 2;
 
-	for(int i = 0; ; i++) {
+	int i = 0;
+	for(i = 0; ; i++) {
 		if((w & cmd[i].mask) == cmd[i].opcode) {
 			trace(TRACE, "%s ", cmd[i].name);
 			if(cmd[i].params & HAS_SS)

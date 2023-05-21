@@ -11,7 +11,7 @@ void run() {
 	}
 }
 
-int runprogram() {
+int main() {
 	w_write(ostat, 0177777);
 	log_level = TRACE;
 	run();
