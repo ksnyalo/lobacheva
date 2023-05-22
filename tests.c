@@ -481,7 +481,7 @@ int main() {
 	test_cmp();
 	test_flagN();
 	test_flagZ();
-//	test_flagC();
+	test_flagC();
 
 	test_mem();
 	test_parse_cmd();

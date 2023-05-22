@@ -162,7 +162,7 @@ void set_NZ(word w, char shift) {
 }
 
 void set_C(word w1, word w2) {
-	if((w1>>16) & 1 && (w2>>16) & 1)
+	if((w1>>15) & 1 && (w2>>15) & 1)
 		psw = psw | 1;
 //	trace(TRACE, "psw = %o\n", psw);
 }
@@ -179,14 +179,14 @@ int get_r(word w) {
 // сдвиг
 void get_xx(word w) {
 	signed char shift;
-	if((w>>7) & 1) {
-		shift = w | 0xff00;            // операция со словом, код команды и аргумент "слипаются", отрицательный сдвиг
+	if((w>>7) & 1) {          // знаковое
+		shift = w | 0xff00;
 	}
 	else {
-		shift = w & 0377;              // в других случаях все хорошо
+		shift = w & 0377;
 	}
 	xx = w;
-	trace(TRACE, "nn = %d, %o\n", xx, pc+2*xx);
+	trace(TRACE, "nn = %d, pc = %o\n", xx, pc+2*xx);
 }
 
 
