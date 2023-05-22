@@ -1,5 +1,6 @@
 #pragma once
 #define pc reg[7]
+#define sp reg[6]
 #define REGSIZE 8
 #define MEMSIZE (64*1024)
 

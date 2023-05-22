@@ -17,6 +17,9 @@ void do_br();
 void do_beq();
 void do_bpl();
 void do_clr();
+void do_jmp();
+void do_jsr();
+void do_rts();
 
 // флаги
 void set_NZ(word, char);
@@ -37,7 +40,8 @@ enum {
 	HAS_SS,
 	HAS_R = 1<<2,
 	HAS_NN = 1<<3,
-	HAS_XX = 1<<4
+	HAS_XX = 1<<4,
+	HAS_RE = 1<<5
 } params;
 
 
@@ -74,6 +78,9 @@ Command cmd[] = {
 	{0170000, 0020000, "cmp", do_cmp, HAS_SS | HAS_DD},
 	{0177700, 0105700, "tst", do_tst, HAS_DD},
 	{0177000, 0005000, "clr", do_clr, HAS_DD},
+	{0177700, 0000100, "jmp", do_jmp, HAS_DD},
+	{0177000, 0004000, "jsr", do_jsr, HAS_DD | HAS_R},
+	{0177770, 0000200, "rts", do_rts, HAS_RE},
 	{0000000, 0000000, "unknown", do_nothing, NO_PARAMS}
 };
 
@@ -149,6 +156,22 @@ void do_clr() {
 	dd.val = 0;
 }
 
+void do_jmp() {
+	pc = dd.val;
+}
+
+void do_jsr() {
+	sp -= 2;
+	w_write(sp, reg[re]);
+	reg[re] = pc;
+	pc = dd.adr;
+}
+
+void do_rts() {
+	pc = reg[re];
+	reg[re] = w_read(sp);
+	sp += 2;
+}
 
 
 // работа с флагами
@@ -336,6 +359,8 @@ Command parse_cmd(word w) {
 				re = get_r(w>>6) & 7;
 			if(cmd[i].params & HAS_XX)
 				get_xx(w);
+			if(cmd[i].params & HAS_RE)
+				re = get_r(w);
 
 			printf("\n");
 
