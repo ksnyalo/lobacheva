@@ -4,7 +4,7 @@
 #define MEMSIZE (64*1024)
 
 typedef unsigned char byte;
-typedef signed short int word;
+typedef unsigned short int word;
 typedef word Adress;
 
 void load_data();

@@ -36,7 +36,7 @@ void load_data() {
 	int n;
 	byte b;
 	
-	while(scanf("%x %x", &pc, &n) != EOF) {
+	while(scanf("%hx %x", &pc, &n) != EOF) {
 		int i;
 		for(i = 0; i < n; i ++) {
 			scanf("%hhx", &b);

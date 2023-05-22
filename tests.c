@@ -385,25 +385,15 @@ void test_br() {
 	pc  = 0100;
 	Command testcmd = parse_cmd(000402);
 	testcmd.do_command();
-	printf("nn.val = %o, pc = %o\n", nn.val, pc);
+	printf("nn.val = %o, pc = %o\n", xx, pc);
 	assert(pc == 0106);
 
 	trace(TRACE, "Тест для функции br с отрицательным сдвигом\n");
 	pc  = 0106;
 	testcmd = parse_cmd(000774);
 	testcmd.do_command();
-	printf("nn.val = %d, pc = %o\n", nn.val, pc);
+	printf("nn.val = %d, pc = %o\n", xx, pc);
 	assert(pc == 0100);
-	trace(TRACE, " ...OK\n");
-}
-
-void test_sob() {
-	trace(TRACE, "Проверка команды sob\n");
-	reg[0] = 5;
-	reg[1] = 2;
-
-	parse_cmd(0077001);
-
 	trace(TRACE, " ...OK\n");
 }
 
@@ -446,7 +436,7 @@ void test_flagN() {
 void test_flagZ()
 {
 	trace(TRACE, "flag Z\n");
-	reg[3] = 6;    // dd
+	reg[3] = 6;     // dd
 	reg[5] = -6;    // ss
 	Command cmd = parse_cmd(060503);
 	cmd.do_command();
@@ -487,12 +477,11 @@ void test_flagC() {
 
 int main() {
 	log_level = TRACE;
-	//test_br();
-	test_sob();
+	test_br();
 	test_cmp();
 	test_flagN();
 	test_flagZ();
-	test_flagC();
+//	test_flagC();
 
 	test_mem();
 	test_parse_cmd();

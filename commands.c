@@ -23,8 +23,11 @@ void set_NZ(word, char);
 void set_C(word, word);
 
 
-int psw = 0;
+char psw;
 int shift = 0;
+signed char xx;
+word re, nn;
+
 word odata = 0177566;   // регистр данных дисплея
 word ostat = 0177564;   // регистр состояния дисплея
 
@@ -32,8 +35,9 @@ enum {
 	NO_PARAMS,
 	HAS_DD,
 	HAS_SS,
-	HAS_NN,
-	HAS_R
+	HAS_R = 1<<2,
+	HAS_NN = 1<<3,
+	HAS_XX = 1<<4
 } params;
 
 
@@ -41,7 +45,8 @@ enum {
 struct Argument {
 	word val;               // значение аргумента
 	Adress adr;             // адрес аргумента
-} ss, dd, nn, re, rl;
+} ss, dd;
+
 
 
 typedef struct {
@@ -60,12 +65,12 @@ Command cmd[] = {
 	{0170000, 0110000, "movb", do_movb, HAS_SS | HAS_DD},
 	{0177777, 0000000, "halt", do_halt, NO_PARAMS},
 	{0177000, 0077000, "sob", do_sob, HAS_NN | HAS_R},
-	{0177700, 0000400, "br", do_br, HAS_NN},
-	{0177700, 0000700, "br", do_br, HAS_NN},
-	{0177700, 0001400, "beq", do_beq, HAS_NN},
-	{0177700, 0001700, "beq", do_beq, HAS_NN},
-	{0177700, 0100000, "bpl", do_bpl, HAS_NN},
-	{0177700, 0100300, "bpl", do_bpl, HAS_NN},
+	{0177700, 0000400, "br", do_br, HAS_XX},
+	{0177700, 0000700, "br", do_br, HAS_XX},
+	{0177700, 0001400, "beq", do_beq, HAS_XX},
+	{0177700, 0001700, "beq", do_beq, HAS_XX},
+	{0177700, 0100000, "bpl", do_bpl, HAS_XX},
+	{0177700, 0100300, "bpl", do_bpl, HAS_XX},
 	{0170000, 0020000, "cmp", do_cmp, HAS_SS | HAS_DD},
 	{0177700, 0105700, "tst", do_tst, HAS_DD},
 	{0177000, 0005000, "clr", do_clr, HAS_DD},
@@ -80,6 +85,7 @@ void do_nothing() {
 
 void do_halt() {
 	reg_dump();
+//	trace(TRACE, "psw = %o\n\n", psw);
 	trace(INFO, "THE END!!!\n");
 	exit(0);
 }
@@ -104,15 +110,15 @@ void do_movb() {
 }
 
 void do_sob() {
-	if(--reg[re.adr] > 0)
-		pc -= 2 * nn.val;
+	if(--reg[re] > 0)
+		pc -= 2 * nn;
 	else
-		reg[re.adr] = 0;
+		reg[re] = 0;
 	trace(TRACE, "%o\n", pc);
 }
 
 void do_br() {
-	pc = pc + (2 * nn.val);
+	pc += 2 * xx;
 	trace(TRACE, "%o\n", pc);
 }
 
@@ -148,45 +154,39 @@ void do_clr() {
 // работа с флагами
 void set_NZ(word w, char shift) {
 	psw = 0;
-	if((w>>shift))
+	if((w>>shift) & 1)
 		psw = psw | (1<<2);
-	else if (!(w | 0))
+	else if (w == 0)
 		psw = psw | (1<<1);
+//	trace(TRACE, "psw = %o\n", psw);
 }
 
 void set_C(word w1, word w2) {
-	if((w1>>15) & 1 && (w2>>15) & 1)
+	if((w1>>16) & 1 && (w2>>16) & 1)
 		psw = psw | 1;
+//	trace(TRACE, "psw = %o\n", psw);
 }
 
 
-
-struct Argument get_r(word w) {
-	struct Argument res;
-	int r = w & 7;
-	res.adr = r;
-	res.val = reg[r];
-	trace(TRACE, "R%o ", r);
-	return res;
+int get_r(word w) {
+	re = w & 7;
+	trace(TRACE, "R%o ", re);
+	return re;
 }
 
 
 
 // сдвиг
-struct Argument get_nn(word w) {
-	struct Argument res;
-	char shift;
-	if((w & 0700) == 0700) {
-		shift = (w - 0777);      // операция со словом, код команды и аргумент "слипаются", отрицательный сдвиг
+void get_xx(word w) {
+	signed char shift;
+	if((w>>7) & 1) {
+		shift = w | 0xff00;            // операция со словом, код команды и аргумент "слипаются", отрицательный сдвиг
 	}
-	/*else if ((w & 0100700) == 0100300 || (w & 0100700) == 0100200 || (w & 0100700) == 0100100) {
-		shift = w & 0777;
-	}*/
 	else {
-		shift = w & 077;              // в других случаях все хорошо
+		shift = w & 0377;              // в других случаях все хорошо
 	}
-	res.val = shift;
-	return res;
+	xx = w;
+	trace(TRACE, "nn = %d, %o\n", xx, pc+2*xx);
 }
 
 
@@ -196,7 +196,6 @@ struct Argument get_mr(word w) {
     struct Argument res;
     int r = w & 7;                     // номер регистра
     int mod = (w >> 3) & 7;            // номер моды
-    word sh;
     switch (mod) {
 		// мода 0, R1
 		case 0:
@@ -208,7 +207,7 @@ struct Argument get_mr(word w) {
 		// мода 1, (R1)
 		case 1:
 			res.adr = reg[r];           // в регистре адрес
-			if(w & (1<<9)) {
+			if((w>>15) & 1) {
 				res.val = b_read(res.adr);  // по адресу - значение, байтовая операция
 			}
 			else
@@ -220,7 +219,7 @@ struct Argument get_mr(word w) {
 		case 2:
 			res.adr = reg[r];           // в регистре адрес
 
-			if(((w>>8) & 1) && r != 6 && r != 7) {
+			if(((w>>15) & 1) && r != 6 && r != 7) {
 				res.val = b_read(res.adr);
 				reg[r]++;               // для байтовой операции
 			}
@@ -249,7 +248,7 @@ struct Argument get_mr(word w) {
 
 		// мода 4, автодекрементный режим, сначала минусуется
 		case 4:
-			if(((w>>8) & 1) && r != 6 && r!= 7)
+			if(((w>>15) & 1) && r != 6 && r!= 7)
 				reg[r]--;
 			else {
 				reg[r] -= 2;
@@ -330,10 +329,13 @@ Command parse_cmd(word w) {
 				ss = get_mr(w>>6);
 			if(cmd[i].params & HAS_DD)
 				dd = get_mr(w);
-			if(cmd[i].params & HAS_NN)
-				nn = get_nn(w);
+			if(cmd[i].params & (HAS_NN)) {
+				nn = w & 077;
+			}
 			if(cmd[i].params & HAS_R)
-				re = get_r(w>>6);
+				re = get_r(w>>6) & 7;
+			if(cmd[i].params & HAS_XX)
+				get_xx(w);
 
 			printf("\n");
 
